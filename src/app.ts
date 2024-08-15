@@ -11,11 +11,17 @@ export const fastify = Fastify({
   logger: true
 })
 
+declare module "fastify"{
+  export interface FastifyInstance {
+    authenticate: any
+  }
+}
+
 fastify.register(fjwt, {
   secret: process.env.JWT_SECRET
 })
 
-fastify.decorate("/auth", async(req: FastifyRequest, reply:FastifyReply) => {
+fastify.decorate("authenticate", async(req: FastifyRequest, reply:FastifyReply) => {
   try {
     await req.jwtVerify()
   } catch (error) {

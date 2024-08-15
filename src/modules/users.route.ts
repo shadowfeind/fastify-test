@@ -21,7 +21,9 @@ async function userRoutes(server: FastifyInstance){
         }
     }, loginHandler)
 
-    server.get("/",{}, getAllUsersHandler)
+    server.get("/",{
+        preHandler: [server.authenticate]
+    }, getAllUsersHandler)
 }
 
 export default userRoutes
