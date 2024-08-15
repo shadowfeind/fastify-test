@@ -1,53 +1,55 @@
-import dotenv from 'dotenv'
-import Fastify, { FastifyReply, FastifyRequest } from 'fastify'
-import fjwt from '@fastify/jwt'
-import userRoutes from './modules/users.route'
-import { userSchmas } from './modules/users.schema'
+import dotenv from "dotenv";
+import Fastify, { FastifyReply, FastifyRequest } from "fastify";
+import fjwt from "@fastify/jwt";
+import userRoutes from "./modules/users/users.route";
+import { userSchmas } from "./modules/users/users.schema";
+import { productSchemas } from "./modules/products/products.schema";
 
-
-dotenv.config()
+dotenv.config();
 
 export const fastify = Fastify({
-  logger: true
-})
+  logger: true,
+});
 
-declare module "fastify"{
+declare module "fastify" {
   export interface FastifyInstance {
-    authenticate: any
+    authenticate: any;
   }
 }
 
 fastify.register(fjwt, {
-  secret: process.env.JWT_SECRET
-})
+  secret: process.env.JWT_SECRET,
+});
 
-fastify.decorate("authenticate", async(req: FastifyRequest, reply:FastifyReply) => {
-  try {
-    await req.jwtVerify()
-  } catch (error) {
-    return reply.send(error)
+fastify.decorate(
+  "authenticate",
+  async (req: FastifyRequest, reply: FastifyReply) => {
+    try {
+      await req.jwtVerify();
+    } catch (error) {
+      return reply.send(error);
+    }
   }
-})
+);
 
-fastify.get('/checkup', async () => {
-  return { status: 'OK' }
-})
+fastify.get("/checkup", async () => {
+  return { status: "OK" };
+});
 
-fastify.get('/ping', async () => {
-  return 'pong\n'
-})
-
+fastify.get("/ping", async () => {
+  return "pong\n";
+});
 
 const start = async () => {
-  for(const schema of userSchmas){
-    fastify.addSchema(schema)
+  for (const schema of [...userSchmas, ...productSchemas]) {
+    fastify.addSchema(schema);
   }
-    fastify.register(userRoutes, {prefix: "/api/v1/users"})
+  fastify.register(userRoutes, { prefix: "/api/v1/users" });
   try {
-    await fastify.listen({ port: process.env.PORT })
+    await fastify.listen({ port: process.env.PORT });
   } catch (err) {
-    fastify.log.error(err)
-    process.exit(1)
+    fastify.log.error(err);
+    process.exit(1);
   }
-}
-start()
+};
+start();
